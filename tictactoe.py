@@ -46,7 +46,7 @@ class Game:
         self.current_state = matrix
 
         # Player X always plays first
-        self.player_turn = 'X'
+        self.player_turn = '○'
 
     def draw_board(self):
         print()
@@ -70,21 +70,21 @@ class Game:
         Ocounter = 0
         for i in range(0, self.n):
             for j in range(0, self.n):
-                if self.current_state[i][j] == 'X':
+                if self.current_state[i][j] == '○':
                     Xcounter += 1
                     Ocounter = 0
                     continue
 
-                if self.current_state[i][j] == 'O':
+                if self.current_state[i][j] == '•':
                     Ocounter += 1
                     Xcounter = 0
                     continue
 
             if Xcounter == self.s:
-                return 'X'
+                return '○'
 
             if Ocounter == self.s:
-                return 'O'
+                return '•'
 
             Xcounter = 0
             Ocounter = 0
@@ -94,12 +94,12 @@ class Game:
             Ocounter = 0
             for i in range(0, self.n):
                 for j in range(0, self.n):
-                    if self.current_state[j][i] == 'X':
+                    if self.current_state[j][i] == '○':
                         Xcounter += 1
                         Ocounter = 0
                         continue
 
-                    if self.current_state[j][i] == 'O':
+                    if self.current_state[j][i] == '•':
                         Ocounter += 1
                         Xcounter = 0
                         continue
@@ -123,21 +123,21 @@ class Game:
         for i in range(0, self.n):
             for j in range(0, self.n):
                 if i == j:
-                    if self.current_state[j][i] == 'X':
+                    if self.current_state[j][i] == '○':
                         Xcounter += 1
                         Ocounter = 0
                         continue
 
-                    if self.current_state[j][i] == 'O':
+                    if self.current_state[j][i] == '•':
                         Ocounter += 1
                         Xcounter = 0
                         continue
 
             if Xcounter == self.s:
-                return 'X'
+                return '○'
 
             if Ocounter == self.s:
-                return 'O'
+                return '•'
 
             Xcounter = 0
             Ocounter = 0
@@ -163,10 +163,10 @@ class Game:
         self.result = self.is_end()
         # Printing the appropriate message if the game has ended
         if self.result != None:
-            if self.result == 'X':
-                print('The winner is X!')
-            elif self.result == 'O':
-                print('The winner is O!')
+            if self.result == '○':
+                print('The winner is ○!')
+            elif self.result == '•':
+                print('The winner is •!')
             elif self.result == '.':
                 print("It's a tie!")
             self.initialize_game()
@@ -183,10 +183,10 @@ class Game:
                 print('The move is not valid! Try again.')
 
     def switch_player(self):
-        if self.player_turn == 'X':
-            self.player_turn = 'O'
-        elif self.player_turn == 'O':
-            self.player_turn = 'X'
+        if self.player_turn == '○':
+            self.player_turn = '•'
+        elif self.player_turn == '•':
+            self.player_turn = '○'
         return self.player_turn
 
     def minimax(self, max=False):
@@ -212,14 +212,14 @@ class Game:
             for j in range(0, 3):
                 if self.current_state[i][j] == '.':
                     if max:
-                        self.current_state[i][j] = 'O'
+                        self.current_state[i][j] = '•'
                         (v, _, _) = self.minimax(max=False)
                         if v > value:
                             value = v
                             x = i
                             y = j
                     else:
-                        self.current_state[i][j] = 'X'
+                        self.current_state[i][j] = '○'
                         (v, _, _) = self.minimax(max=True)
                         if v < value:
                             value = v
@@ -241,9 +241,9 @@ class Game:
         x = None
         y = None
         result = self.is_end()
-        if result == 'X':
+        if result == '○':
             return (-1, x, y)
-        elif result == 'O':
+        elif result == '•':
             return (1, x, y)
         elif result == '.':
             return (0, x, y)
@@ -251,14 +251,14 @@ class Game:
             for j in range(0, 3):
                 if self.current_state[i][j] == '.':
                     if max:
-                        self.current_state[i][j] = 'O'
+                        self.current_state[i][j] = '•'
                         (v, _, _) = self.alphabeta(alpha, beta, max=False)
                         if v > value:
                             value = v
                             x = i
                             y = j
                     else:
-                        self.current_state[i][j] = 'X'
+                        self.current_state[i][j] = '○'
                         (v, _, _) = self.alphabeta(alpha, beta, max=True)
                         if v < value:
                             value = v
@@ -290,18 +290,18 @@ class Game:
                 return
             start = time.time()
             if algo == self.MINIMAX:
-                if self.player_turn == 'X':
+                if self.player_turn == '○':
                     (_, x, y) = self.minimax(max=False)
                 else:
                     (_, x, y) = self.minimax(max=True)
             else:  # algo == self.ALPHABETA
-                if self.player_turn == 'X':
+                if self.player_turn == '○':
                     (m, x, y) = self.alphabeta(max=False)
                 else:
                     (m, x, y) = self.alphabeta(max=True)
             end = time.time()
-            if (self.player_turn == 'X' and player_x == self.HUMAN) or (
-                    self.player_turn == 'O' and player_o == self.HUMAN):
+            if (self.player_turn == '○' and player_x == self.HUMAN) or (
+                    self.player_turn == '•' and player_o == self.HUMAN):
                 if self.recommend:
                     print(F'Evaluation time: {round(end - start, 7)}s')
                     print(F'Recommended move: x = {x}, y = {y}')
