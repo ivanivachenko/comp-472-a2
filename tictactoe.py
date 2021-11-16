@@ -17,11 +17,11 @@ class Game:
     test = 0
     d1 = 0
     d2 = 0
-    a1 = MINIMAX
-    a2 = MINIMAX
-    #e = True   #euristic
-    e1 = 1
-    e2 = 2
+    E1 = 1
+    E2 = 2
+    a1 = 1
+    a2 = 2
+    mini_or_alpha = True
     player_x = AI
     player_o = AI
 
@@ -51,11 +51,12 @@ class Game:
 
         self.t = int(input("Enter the maximum time to return a move (in seconds) (t):"))
 
-        self.e1 = int(input("Chose the euristic to use (e) - 1 or 2:"))
-        self.e2 = int(input("Chose the euristic to use (e) - 1 or 2:"))
+        self.E1 = int(input("Chose the euristic to use (e) - 1 or 2:"))
+        self.E2 = int(input("Chose the euristic to use (e) - 1 or 2:"))
 
-        self.a1 = int(input("Chose between MINIMAX (0) or ALPHABETA (1):"))
-        self.a2 = int(input("Chose between MINIMAX (0) or ALPHABETA (1):"))
+        #self.a1 = int(input("Chose between MINIMAX (0) or ALPHABETA (1):"))
+        #self.a2 = int(input("Chose between MINIMAX (0) or ALPHABETA (1):"))
+
         self.d1 = int(input("Enter maximum depth of AI 1:"))
         self.d2 = int(input("Enter maximum depth of AI 2:"))
 
@@ -116,12 +117,12 @@ class Game:
             if Game.player_x == 3:
                 f.write("\n\nPlayer X:")
                 f.write("\nMaximum depth = " + str(self.d1))
-                f.write("\nEuristic = " + str(self.e1))
+                f.write("\nEuristic = " + str(self.E1))
                 f.write("\nMinimax (0) or Alphabeta (1) = " + str(self.a1))
             if Game.player_o == 3:
                 f.write("\n\nPlayer O:")
                 f.write("\nMaximum depth = " + str(self.d2))
-                f.write("\nEuristic = " + str(self.e2))
+                f.write("\nEuristic = " + str(self.E2))
                 f.write("\nMinimax (0) or Alphabeta (1) = " + str(self.a2))
 
             f.write("\n\nInitial configuration of the board:")
@@ -345,7 +346,7 @@ class Game:
                     x = i
                     y = j
 
-        self.nb_states_current_move += 1
+        #self.nb_states_current_move += 1
         return tilechecker, x, y
 
     def e2(self, current_state):  # targets diagonals
@@ -425,7 +426,7 @@ class Game:
         self.nb_states_current_move += 1
         return 1, x, y
 
-    def alphabeta(self, alpha=-2, beta=2, max=False):
+    def alphabeta(self, depth, e, alpha=-2, beta=2, max=False):
         # Minimizing for 'X' and maximizing for 'O'
         # Possible values are:
         # -1 - win for 'X'
@@ -438,12 +439,14 @@ class Game:
         x = None
         y = None
         result = self.is_end()
-        if result == 'X':
-            return (-1, x, y)
-        elif result == '0':
-            return (1, x, y)
-        elif result == '.':
-            return (0, x, y)
+
+        if (depth >= 3 or result) and e == 1:
+            return self.e1(self.current_state)
+
+        if (depth >= 3 or result) and e == 2:
+            return self.e2(self.current_state)
+
+
         for i in range(0, self.n):
             for j in range(0, self.n):
                 if self.current_state[i][j] == '.':
@@ -473,8 +476,8 @@ class Game:
                             return (value, x, y)
                         if value < beta:
                             beta = value
-        # self.test+=1
-        # print(self.test)
+
+        self.nb_states_current_move += 1
         return (value, x, y)
 
     def play(self, algo=None, player_x=None, player_o=None):
@@ -485,6 +488,7 @@ class Game:
             player_x = self.HUMAN
         if player_o == None:
             player_o = self.HUMAN
+
         while True:
             self.draw_board() #new configuration of the board
             if self.check_end():
@@ -492,14 +496,14 @@ class Game:
             start = time.time()
             if algo == self.MINIMAX:
                 if self.player_turn == 'X':
-                    (_, x, y) = self.minimax(self.d1, self.e1, max=False)
+                    (_, x, y) = self.minimax(self.d1, self.E1, max=False)
                 else:
-                    (_, x, y) = self.minimax(self.d2, self.e2, max=True)
+                    (_, x, y) = self.minimax(self.d2, self.E2, max=True)
             else:  # algo == self.ALPHABETA
                 if self.player_turn == 'X':
-                    (m, x, y) = self.alphabeta(max=False)
+                    (m, x, y) = self.alphabeta(self.d1, self.E1, max=False)
                 else:
-                    (m, x, y) = self.alphabeta(max=True)
+                    (m, x, y) = self.alphabeta(self.d2, self.E2, max=True)
             end = time.time()
             self.write_move_stats(player_x, player_o, start, end, x, y)
             if (self.player_turn == 'X' and player_x == self.HUMAN) or (
@@ -528,12 +532,29 @@ class Game:
 
 def main():
     g = Game(recommend=True)
-    r = 10
-    for i in range(0, r):
-        g.play(algo=Game.MINIMAX, player_x=Game.AI, player_o=Game.AI)
 
-    g.play(algo=Game.MINIMAX, player_x=Game.HUMAN, player_o=Game.HUMAN)
-    g.play(algo=Game.MINIMAX, player_x=Game.AI, player_o=Game.HUMAN)
+    mini_or_max = input("Chose Minimax (false) or Alphabeta (true):")
+    player_x = input("Chose player x as AI or Human (AI or H)")
+    player_o = input("Chose player x as AI or Human (AI or H)")
+
+    r = 10
+    if mini_or_max is False:
+        algo = Game.MINIMAX
+    else:
+        algo = Game.ALPHABETA
+
+    if player_x == "AI":
+        player_x = Game.AI
+    elif player_x == "H":
+        player_x = Game.HUMAN
+
+    if player_o == "AI":
+        player_o = Game.AI
+    elif player_o == "H":
+        player_o = Game.HUMAN
+
+    for i in range(0, r):
+        g.play(algo, player_x, player_o)
 
 
 if __name__ == "__main__":
